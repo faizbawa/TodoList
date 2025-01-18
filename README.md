@@ -1,2 +1,2 @@
 # TodoList
-Python Project for a Todo List app
+Python Project for a Todo List app with gui
