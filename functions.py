@@ -1,4 +1,4 @@
-FILEPATH = "todos_item.txt"
+FILEPATH = "todo_items.txt"
 
 
 def get_todos(filepath=FILEPATH):
@@ -16,7 +16,7 @@ def write_todos(todos_arg, filepath=FILEPATH):
     """
     Write the to-do items list in the file
     """
-    with open(filepath) as file:
+    with open(filepath, 'w') as file:
         file.writelines(todos_arg)
 
 
