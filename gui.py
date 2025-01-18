@@ -1,9 +1,14 @@
 import time
-
 import FreeSimpleGUI as sg
-
 import functions
+import os
 
+# Ensure the file exists
+if not os.path.exists("todo_items.txt"):
+    with open('todo_items.txt', 'w') as file:
+        pass
+
+# Define the GUI theme and layout
 sg.theme("Black")
 clock = sg.Text('', key='clock')
 label = sg.Text("Type in a To-do")
@@ -15,6 +20,7 @@ edit_button = sg.Button("Edit")
 complete_button = sg.Button("Complete")
 exit_button = sg.Button("Exit")
 
+# Create the window
 window = sg.Window('My To-do App',
                    layout=[[clock],
                            [label],
@@ -24,52 +30,66 @@ window = sg.Window('My To-do App',
                            [exit_button]],
                    font=('Helvetica', 15))
 
+# Event loop
 while True:
-    event, values = window.read(timeout=100)
-    window["clock"].update(value=time.strftime("%b %d, %Y %H:%M:%S"))
-    print(event)
-    print(values)
+    try:
+        event, values = window.read(timeout=100)
+        # Update the clock
+        if event != sg.WINDOW_CLOSED:
+            window["clock"].update(value=time.strftime("%b %d, %Y %H:%M:%S"))
 
-    match event:
-        case "Add" :
-            todos = functions.get_todos()
-            new_todo = values['todo'] + "\n"
-            todos.append(new_todo)
-            functions.write_todos(todos)
-            window['todos'].update(values=todos)
+        # Debugging output
+        print(event)
+        print(values)
 
-        case "Edit":
-            try:
-                todo_edit= values['todos'][0]
+        # Event handling
+        match event:
+            case "Add":
+                todos = functions.get_todos()
                 new_todo = values['todo'] + "\n"
-
-                todos = functions.get_todos()
-                index = todos.index(todo_edit)
-                todos[index] = new_todo
+                todos.append(new_todo)
                 functions.write_todos(todos)
                 window['todos'].update(values=todos)
-                window['todo'].update(value="")
-            except IndexError:
-                sg.popup("Please select an Item", font=('Helvetica' , 10))
 
-        case "Complete":
-            try:
-                todo_complete = values['todos'][0]
-                todos = functions.get_todos()
-                todos.remove(todo_complete)
-                functions.write_todos(todos)
-                window['todos'].update(values=todos)
-                window['todo'].update(value="")
-            except IndexError:
-                sg.popup("Please select an Item", font=('Helvetica', 10))
+            case "Edit":
+                try:
+                    todo_edit = values['todos'][0]
+                    new_todo = values['todo'] + "\n"
 
-        case "Exit":
-            break
+                    todos = functions.get_todos()
+                    index = todos.index(todo_edit)
+                    todos[index] = new_todo
+                    functions.write_todos(todos)
+                    window['todos'].update(values=todos)
+                    window['todo'].update(value="")
+                except IndexError:
+                    sg.popup("Please select an Item", font=('Helvetica', 10))
 
-        case 'todos':
-            window['todo'].update(value=values['todos'][0].strip("\n"))
+            case "Complete":
+                try:
+                    todo_complete = values['todos'][0]
+                    todos = functions.get_todos()
+                    todos.remove(todo_complete)
+                    functions.write_todos(todos)
+                    window['todos'].update(values=todos)
+                    window['todo'].update(value="")
+                except IndexError:
+                    sg.popup("Please select an Item", font=('Helvetica', 10))
 
-        case sg.WINDOW_CLOSED:
-            break
+            case "Exit":
+                break
+
+            case 'todos':
+                try:
+                    window['todo'].update(value=values['todos'][0].strip("\n"))
+                except IndexError:
+                    pass
+
+            case sg.WINDOW_CLOSED:
+                break
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        break
 
 window.close()
